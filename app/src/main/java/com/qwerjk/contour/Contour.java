@@ -18,41 +18,38 @@ package com.qwerjk.contour;
 // import java.awt.Polygon;
 // import java.awt.Shape;
 // import java.awt.geom.Ellipse2D;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
-import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.Point;
 import android.graphics.RectF;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class Contour {
+    private static final int INITIAL_SIZE = 50;
 
-    static int INITIAL_SIZE = 50;
-
-    int label;
+    private int label;
     public List<Point> points;
-    Matrix matrixTrans;
 
-    Contour(int label, int size) {
+    public Contour(int label, int size) {
         this.label = label;
-        points = new ArrayList<Point>(size);
+        points = new ArrayList<>(size);
     }
 
-    Contour(int label) {
+    public Contour(int label) {
         this.label = label;
-        points = new ArrayList<Point>(INITIAL_SIZE);
+        points = new ArrayList<>(INITIAL_SIZE);
     }
 
-    Contour(Contour contour) {
-        this.label = contour.label;
+    public Contour(Contour contour) {
+        label = contour.label;
         points = contour.points;
     }
 
-    Contour() {
-
+    public Contour() {
     }
 
     void addPoint(Point n) {
@@ -60,8 +57,9 @@ public class Contour {
     }
 
     // --------------------- drawing ------------
-    public Path creatPathFromPoint(int[] xList, int[] yList) {
+    public Path createPathFromPoint(int[] xList, int[] yList) {
         Path path = new Path();
+
         boolean isMove = false;
         for (int i = 0; i < xList.length; i++) {
             if (isMove) {
@@ -71,6 +69,7 @@ public class Contour {
                 isMove = true;
             }
         }
+
         return path;
     }
 
@@ -79,22 +78,24 @@ public class Contour {
         if (m > 1) {
             int[] xPoints = new int[m];
             int[] yPoints = new int[m];
+
             int k = 0;
             Iterator<Point> itr = points.iterator();
             while (itr.hasNext() && k < m) {
                 Point cpt = itr.next();
                 xPoints[k] = cpt.x;
                 yPoints[k] = cpt.y;
-                k = k + 1;
+                k++;
             }
-            return creatPathFromPoint(xPoints, yPoints);
+
+            return createPathFromPoint(xPoints, yPoints);
         } else { // use circles for isolated pixels
             Point cpt = points.get(0);
-            return creatOval(cpt.x - 0.1f, cpt.y - 0.1f, 0.2f, 0.2f);
+            return createOval(cpt.x - 0.1f, cpt.y - 0.1f, 0.2f, 0.2f);
         }
     }
 
-    public Path creatOval(float x, float y, float w, float h) {
+    public Path createOval(float x, float y, float w, float h) {
         Path path = new Path();
         path.addOval(new RectF(x, y, x + w, y + h), Direction.CW);
         return path;
@@ -103,21 +104,19 @@ public class Contour {
     public static Path[] makePolygons(List<Contour> contours) {
         if (contours == null)
             return null;
-        else {
-            Path[] pa = new Path[contours.size()];
-            int i = 0;
-            for (Contour c : contours) {
-                pa[i] = c.makePolygon();
-                i = i + 1;
-            }
-            return pa;
-        }
+
+        Path[] pa = new Path[contours.size()];
+
+        int i = 0;
+        for (Contour c : contours)
+            pa[i++] = c.makePolygon();
+
+        return pa;
     }
 
-    void moveBy(int dx, int dy) {
-        for (Point pt : points) {
-            pt = translate(pt, dx, dy);
-        }
+    private void moveBy(int dx, int dy) {
+        for (Point pt : points)
+            translate(pt, dx, dy);
     }
 
     public Point translate(Point srcPoint, int dx, int dy) {
@@ -132,17 +131,6 @@ public class Contour {
         }
     }
 
-    // --------------------- chain code ------------
-
-    /*
-     * byte[] makeChainCode8() { int m = points.size(); if (m>1){ int[] xPoints
-     * = new int[m]; int[] yPoints = new int[m]; int k = 0; Iterator<Point> itr
-     * = points.iterator(); while (itr.hasNext() && k < m) { Point cn =
-     * itr.next(); xPoints[k] = cn.x; yPoints[k] = cn.y; k = k + 1; } return
-     * null; } else { // use circles for isolated pixels //Point cn =
-     * points.get(0); return null; } }
-     */
-
     // --------------------- contour statistics ------------
 
     public int getLength() {
@@ -150,6 +138,6 @@ public class Contour {
     }
 
     public String toString() {
-        return "Contour " + label + ": " + this.getLength() + " points";
+        return "Contour " + label + ": " + getLength() + " points";
     }
 }

@@ -13,9 +13,9 @@ import android.util.Log;
 import java.util.List;
 
 public class Border {
-    // borderSize From 0-50
-    private float borderSize = 12;
+    private float borderSize; // borderSize From 0-50
     private int color;
+
     private boolean isGetPath;
     private Path[] outerPath;
     private Path[] innerPath;
@@ -87,28 +87,23 @@ public class Border {
         int width = src.getWidth();
         int height = src.getHeight();
         Log.e("src size: ", " " + src.getWidth() + " va " + src.getHeight());
-        float borderSize = 0;
-        // sizeBorder From 0 -> 50
-        float sizeBorder = this.getBorderSize();
-        int sizeActual = 0;
-        if (width > height) {
-            sizeActual = height;
-        } else {
-            sizeActual = width;
-        }
+
+        float borderSize; // sizeBorder From 0 -> 50
+        float sizeBorder = getBorderSize();
+        int sizeActual = Math.min(width, height);
 
         Paint mPaint = new Paint();
 
         // Border size = 0 -> 3% width or height Bitmap with small bitmap
         float newSize = sizeActual * 0.3f;
-        if (sizeActual < 150f) {
+        if (sizeActual < 150f)
             borderSize = (sizeBorder / 50f) * newSize;
-        } else {
+        else
             borderSize = sizeBorder;
-        }
+
         mPaint.setStrokeWidth(borderSize);
 
-        mPaint.setColor(this.getColor());
+        mPaint.setColor(getColor());
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
         mPaint.setFilterBitmap(true);
@@ -117,18 +112,19 @@ public class Border {
         /*
          * You should store this Path for next time draw
          */
-        if (!this.isGetPath()) {
+        if (!isGetPath()) {
             Log.e("is Run ", "is Run ");
+
             // init paint to get extract alpha bitmap
             Paint mPainting = new Paint();
             mPainting.setDither(true);
             mPainting.setAntiAlias(true);
             mPainting.setColor(Color.BLACK);
-            int[] offset = new int[2];
 
+            int[] offset = new int[2];
             Bitmap bmAlpha = src.extractAlpha(mPainting, offset);
-            Bitmap resultBitmap = Bitmap.createBitmap(width, height,
-                Config.ARGB_8888);
+
+            Bitmap resultBitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
             Canvas mCanvas = new Canvas(resultBitmap);
 
             Paint mainPaint = new Paint();
@@ -139,25 +135,23 @@ public class Border {
             mainPaint.setStrokeCap(Paint.Cap.SQUARE);
             mCanvas.drawBitmap(bmAlpha, 0, 0, mainPaint);
 
-            if (bmAlpha != null && !bmAlpha.isRecycled()) {
+            if (!bmAlpha.isRecycled())
                 bmAlpha.recycle();
-            }
 
             // Find contour
             ContourTracer tracer = new ContourTracer(resultBitmap);
-            this.setOuterContours(tracer.getOuterContours());
-            this.setInnerContours(tracer.getInnerContours());
+            setOuterContours(tracer.getOuterContours());
+            setInnerContours(tracer.getInnerContours());
 
-            this.setOuterPath(Contour.makePolygons(this.getOuterContours()));
-            this.setInnerPath(Contour.makePolygons(this.getInnerContours()));
-            if (resultBitmap != null && !resultBitmap.isRecycled()) {
+            setOuterPath(Contour.makePolygons(getOuterContours()));
+            setInnerPath(Contour.makePolygons(getInnerContours()));
+            if (!resultBitmap.isRecycled())
                 resultBitmap.recycle();
-            }
-            this.setGetPath(true);
+
+            setGetPath(true);
         }
 
-        Bitmap finalBitmap = Bitmap.createBitmap(src.getWidth(),
-            src.getHeight(), src.getConfig());
+        Bitmap finalBitmap = Bitmap.createBitmap(src.getWidth(), src.getHeight(), src.getConfig());
         Matrix mMatrix = new Matrix();
         mMatrix.setScale((width - borderSize) / (width * 1f),
             (height - borderSize) / (height * 1f), width / 2f, height / 2f);
@@ -167,21 +161,20 @@ public class Border {
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
 
-        for (Path p : this.getOuterPath()) {
-
-            Path temp = new Path(p);
-            temp.transform(mMatrix);
-
-            canvasBorder.drawPath(temp, mPaint);
-        }
-        for (Path p : this.getInnerPath()) {
+        for (Path p : getOuterPath()) {
             Path temp = new Path(p);
             temp.transform(mMatrix);
             canvasBorder.drawPath(temp, mPaint);
         }
-        canvasBorder.drawBitmap(src, mMatrix, mPaint);// draw
+
+        for (Path p : getInnerPath()) {
+            Path temp = new Path(p);
+            temp.transform(mMatrix);
+            canvasBorder.drawPath(temp, mPaint);
+        }
+
+        canvasBorder.drawBitmap(src, mMatrix, mPaint);
 
         return finalBitmap;
-
     }
 }
