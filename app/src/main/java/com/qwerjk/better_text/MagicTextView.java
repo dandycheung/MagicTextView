@@ -83,7 +83,7 @@ public class MagicTextView extends TextView {
 		init(attrs);
 	}
 
-	public void init(AttributeSet attrs){
+	public void init(AttributeSet attrs) {
 		outerShadows = new ArrayList<>();
 		innerShadows = new ArrayList<>();
 
@@ -160,11 +160,11 @@ public class MagicTextView extends TextView {
 		strokeMiter = miter;
 	}
 
-	public void setStroke(float width, int color){
+	public void setStroke(float width, int color) {
 		setStroke(width, color, Join.MITER, 10);
 	}
 
-	public void addOuterShadow(float r, float dx, float dy, int color){
+	public void addOuterShadow(float r, float dx, float dy, int color) {
 		if (r == 0)
 			r = 0.0001f;
 
@@ -178,15 +178,15 @@ public class MagicTextView extends TextView {
 		innerShadows.add(new InnerShadow(r, dx, dy, color));
 	}
 
-	public void clearInnerShadows(){
+	public void clearInnerShadows() {
 		innerShadows.clear();
 	}
 
-	public void clearOuterShadows(){
+	public void clearOuterShadows() {
 		outerShadows.clear();
 	}
 
-	public void setForegroundDrawable(Drawable d){
+	public void setForegroundDrawable(Drawable d) {
 		foregroundDrawable = d;
 	}
 
