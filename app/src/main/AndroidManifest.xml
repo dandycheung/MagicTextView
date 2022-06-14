@@ -11,8 +11,7 @@
         android:label="@string/app_name"
         android:hardwareAccelerated="true">
         <activity
-            android:name=".MagicTextViewActivity"
-            android:label="@string/app_name" >
+            android:name=".MagicTextViewActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
