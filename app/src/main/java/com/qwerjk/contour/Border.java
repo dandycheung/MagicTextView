@@ -39,7 +39,7 @@ public class Border {
         return isGetPath;
     }
 
-    public void setGetPath(boolean isGetPath) {
+    private void setGetPath(boolean isGetPath) {
         this.isGetPath = isGetPath;
     }
 
@@ -47,7 +47,7 @@ public class Border {
         return outerPath;
     }
 
-    public void setOuterPath(Path[] outerPath) {
+    private void setOuterPath(Path[] outerPath) {
         this.outerPath = outerPath;
     }
 
@@ -55,7 +55,7 @@ public class Border {
         return innerPath;
     }
 
-    public void setInnerPath(Path[] innerPath) {
+    private void setInnerPath(Path[] innerPath) {
         this.innerPath = innerPath;
     }
 
@@ -63,7 +63,7 @@ public class Border {
         return outerContours;
     }
 
-    public void setOuterContours(List<Contour> outerContours) {
+    private void setOuterContours(List<Contour> outerContours) {
         this.outerContours = outerContours;
     }
 
@@ -71,7 +71,7 @@ public class Border {
         return innerContours;
     }
 
-    public void setInnerContours(List<Contour> innerContours) {
+    private void setInnerContours(List<Contour> innerContours) {
         this.innerContours = innerContours;
     }
 
@@ -88,26 +88,20 @@ public class Border {
         int height = src.getHeight();
         Log.e("src size: ", " " + src.getWidth() + " va " + src.getHeight());
 
-        float borderSize; // sizeBorder From 0 -> 50
-        float sizeBorder = getBorderSize();
+        float borderSize = getBorderSize();
+
+        // Border size = 0 -> 3% width or height for small bitmap
         int sizeActual = Math.min(width, height);
-
-        Paint mPaint = new Paint();
-
-        // Border size = 0 -> 3% width or height Bitmap with small bitmap
-        float newSize = sizeActual * 0.3f;
         if (sizeActual < 150f)
-            borderSize = (sizeBorder / 50f) * newSize;
-        else
-            borderSize = sizeBorder;
+            borderSize = (borderSize / 50f) * (sizeActual * 0.3f);
 
-        mPaint.setStrokeWidth(borderSize);
-
-        mPaint.setColor(getColor());
-        mPaint.setAntiAlias(true);
-        mPaint.setDither(true);
-        mPaint.setFilterBitmap(true);
-        mPaint.setStyle(Style.STROKE);
+        Paint paint = new Paint();
+        paint.setStrokeWidth(borderSize);
+        paint.setColor(getColor());
+        paint.setAntiAlias(true);
+        paint.setDither(true);
+        paint.setFilterBitmap(true);
+        paint.setStyle(Style.STROKE);
 
         /*
          * You should store this Path for next time draw
@@ -116,16 +110,16 @@ public class Border {
             Log.e("is Run ", "is Run ");
 
             // init paint to get extract alpha bitmap
-            Paint mPainting = new Paint();
-            mPainting.setDither(true);
-            mPainting.setAntiAlias(true);
-            mPainting.setColor(Color.BLACK);
+            Paint alphaPaint = new Paint();
+            alphaPaint.setDither(true);
+            alphaPaint.setAntiAlias(true);
+            alphaPaint.setColor(Color.BLACK);
 
             int[] offset = new int[2];
-            Bitmap bmAlpha = src.extractAlpha(mPainting, offset);
+            Bitmap bmAlpha = src.extractAlpha(alphaPaint, offset);
 
             Bitmap resultBitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
-            Canvas mCanvas = new Canvas(resultBitmap);
+            Canvas canvas = new Canvas(resultBitmap);
 
             Paint mainPaint = new Paint();
             mainPaint.setDither(true);
@@ -133,7 +127,7 @@ public class Border {
             mainPaint.setFilterBitmap(true);
             mainPaint.setStrokeJoin(Paint.Join.ROUND);
             mainPaint.setStrokeCap(Paint.Cap.SQUARE);
-            mCanvas.drawBitmap(bmAlpha, 0, 0, mainPaint);
+            canvas.drawBitmap(bmAlpha, 0, 0, mainPaint);
 
             if (!bmAlpha.isRecycled())
                 bmAlpha.recycle();
@@ -152,28 +146,28 @@ public class Border {
         }
 
         Bitmap finalBitmap = Bitmap.createBitmap(src.getWidth(), src.getHeight(), src.getConfig());
-        Matrix mMatrix = new Matrix();
-        mMatrix.setScale((width - borderSize) / (width * 1f),
+        Matrix matrix = new Matrix();
+        matrix.setScale((width - borderSize) / (width * 1f),
             (height - borderSize) / (height * 1f), width / 2f, height / 2f);
 
         Canvas canvasBorder = new Canvas(finalBitmap);
 
-        mPaint.setStrokeJoin(Paint.Join.ROUND);
-        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStrokeCap(Paint.Cap.ROUND);
 
         for (Path p : getOuterPath()) {
             Path temp = new Path(p);
-            temp.transform(mMatrix);
-            canvasBorder.drawPath(temp, mPaint);
+            temp.transform(matrix);
+            canvasBorder.drawPath(temp, paint);
         }
 
         for (Path p : getInnerPath()) {
             Path temp = new Path(p);
-            temp.transform(mMatrix);
-            canvasBorder.drawPath(temp, mPaint);
+            temp.transform(matrix);
+            canvasBorder.drawPath(temp, paint);
         }
 
-        canvasBorder.drawBitmap(src, mMatrix, mPaint);
+        canvasBorder.drawBitmap(src, matrix, paint);
 
         return finalBitmap;
     }

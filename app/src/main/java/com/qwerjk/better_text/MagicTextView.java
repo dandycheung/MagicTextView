@@ -93,7 +93,7 @@ public class MagicTextView extends TextView {
 		if (attrs != null) {
 			TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.MagicTextView);
 
-            String typefaceName = a.getString( R.styleable.MagicTextView_typeface);
+            String typefaceName = a.getString(R.styleable.MagicTextView_typeface);
             if (typefaceName != null) {
                 Typeface tf = Typeface.createFromAsset(getContext().getAssets(), String.format("fonts/%s.ttf", typefaceName));
                 setTypeface(tf);
